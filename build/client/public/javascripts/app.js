@@ -11635,7 +11635,7 @@ module.exports = PopoverDescriptionView = (function(_super) {
   };
 
   PopoverDescriptionView.prototype.renderDescription = function() {
-    var description, docType, drawFilterType, filterTag, filterType, filtersType, hasFilter, headerDiv, isShared, permission, permissions, permissionsDiv, sharedClass, sharedTag, _ref1;
+    var calendarTag, calendarType, calendarsType, description, docType, drawCalendarType, drawFilterType, filterTag, filterType, filtersType, hasExpiration, hasFilter, headerDiv, isShared, permission, permissions, permissionsDiv, sharedClass, sharedTag, _ref1;
     this.body.html("");
     description = t(this.model.get("description"));
     this.header.parent().append("<p class=\"line\"> " + description + " </p>");
@@ -11645,16 +11645,18 @@ module.exports = PopoverDescriptionView = (function(_super) {
       this.body.append(permissionsDiv);
     } else {
       this.body.append("<h5>" + (t('required permissions')) + "</h5>");
-      headerDiv = $("<div class='permissionsLine header'>                    <div class='fake-checkbox checked'><div class='circle'></div></div>                    <div class='doctype-name'>Doctype</div>                    <div class='doctype-filter'>Filtre</div>                    <div class='doctype-use'>Usage</div>");
+      headerDiv = $("<div class='permissionsLine header'>                    <div class='fake-checkbox checked'><div class='circle'></div></div>                    <div class='doctype-name'>Doctype</div>                    <div class='doctype-filter'>Filtre</div>                    <div class='doctype-use'>Usage</div>                    <div class='doctype-date'>Date</div>");
       this.body.append(headerDiv);
       filtersType = ['Accès restreint aux documents possédant le tag "Travail".', 'Accès restreint aux documents possédant le tag "Personnel".', 'Accès restreint aux documents possédant le tag "Vacances".', 'Accès restreint aux documents créés il y a plus de deux semaines.', 'Accès restreint aux documents créé il y a plus de deux semaines.'];
+      calendarsType = ['Accès pour 1 jour', 'Accès pour 1 semaine', 'Accès pour 1 mois', 'Accès pour 3 mois'];
       _ref1 = this.model.get("permissions");
       for (docType in _ref1) {
         permission = _ref1[docType];
         hasFilter = (Math.round(Math.random() * 100) + 1) <= 50;
         isShared = (Math.round(Math.random() * 100) + 1) <= 50;
+        hasExpiration = (Math.round(Math.random() * 100) + 1) <= 50;
         if (hasFilter) {
-          filterTag = "&nbsp;";
+          filterTag = "<i class='fa fa-filter disable'></i>";
         } else {
           drawFilterType = Math.round(Math.random() * (filtersType.length - 1));
           filterType = filtersType[drawFilterType];
@@ -11667,7 +11669,14 @@ module.exports = PopoverDescriptionView = (function(_super) {
           sharedClass = "shared";
           sharedTag = "Partagé <div class='tooltip'>L'application demande l'autorisation d'envoyer cette donnée à l'extérieur. En savoir plus…</div>";
         }
-        permissionsDiv = $("<div class='permissionsLine'>                        <div class='fake-checkbox checked'><div class='circle'></div></div>                        <div class='doctype-name'>" + docType + "</div>                        <div class='doctype-filter'>" + filterTag + "</div>                        <div class='doctype-use " + sharedClass + "'>" + sharedTag + "</div>");
+        if (hasExpiration) {
+          calendarTag = "<i class='fa fa-calendar disable'></i>";
+        } else {
+          drawCalendarType = Math.round(Math.random() * (calendarsType.length - 1));
+          calendarType = calendarsType[drawCalendarType];
+          calendarTag = "<i class='fa fa-calendar'></i>                                 <div class='tooltip'>" + calendarType + "</div>";
+        }
+        permissionsDiv = $("<div class='permissionsLine'>                        <div class='fake-checkbox checked'><div class='circle'></div></div>                        <div class='doctype-name'>" + docType + "</div>                        <div class='doctype-filter'>" + filterTag + "</div>                        <div class='doctype-use " + sharedClass + "'>" + sharedTag + "</div>                        <div class='doctype-date'>" + calendarTag + "</div>");
         this.body.append(permissionsDiv);
       }
     }

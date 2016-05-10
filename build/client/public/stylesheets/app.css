@@ -1185,8 +1185,8 @@ h4 {
   -webkit-flex: 0;
   -ms-flex: 0;
   flex: 0;
-  min-width: 25px;
-  height: 15px;
+  min-width: 28px;
+  height: 20px;
   -webkit-border-radius: 15px;
   border-radius: 15px;
   position: relative;
@@ -1198,16 +1198,17 @@ h4 {
   background: #16d943;
 }
 .permissionsLine .fake-checkbox.checked .circle {
-  left: 0;
+  left: 2px;
 }
 .permissionsLine .fake-checkbox .circle {
-  right: 0;
+  top: 2px;
+  right: 2px;
   position: absolute;
   display: inline-block;
-  width: 15px;
-  height: 15px;
-  -webkit-border-radius: 15px;
-  border-radius: 15px;
+  width: 16px;
+  height: 16px;
+  -webkit-border-radius: 20px;
+  border-radius: 20px;
   background: #fff;
 }
 .permissionsLine .doctype-name {
@@ -1222,14 +1223,23 @@ h4 {
   flex: 1;
   max-width: 175px;
 }
-.permissionsLine .doctype-filter {
+.permissionsLine .doctype-filter,
+.permissionsLine .doctype-date {
   width: 45px;
   margin: auto 5px;
   text-align: center;
   position: relative;
 }
-.permissionsLine .doctype-filter i {
+.permissionsLine .doctype-filter i,
+.permissionsLine .doctype-date i {
   cursor: help;
+}
+.permissionsLine .doctype-filter i.disable,
+.permissionsLine .doctype-date i.disable {
+  cursor: auto;
+  opacity: 0.2;
+  -ms-filter: "progid:DXImageTransform.Microsoft.Alpha(Opacity=20)";
+  filter: alpha(opacity=20);
 }
 .permissionsLine .doctype-use {
   -webkit-box-flex: 1;
@@ -1243,26 +1253,35 @@ h4 {
   color: #808080;
   cursor: help;
   position: relative;
+  min-width: 75px;
 }
 .permissionsLine .doctype-use.shared {
-  color: #8b0000;
+  color: #32363f;
+  font-weight: bold;
 }
 .permissionsLine .doctype-filter .tooltip,
-.permissionsLine .doctype-use .tooltip {
+.permissionsLine .doctype-use .tooltip,
+.permissionsLine .doctype-date .tooltip {
   display: none;
   position: absolute;
   background: #32363f;
   color: #fff;
   z-index: 2500;
-  top: 0;
-  left: 100%;
-  width: 250px;
+  top: 50%;
+  left: 20px;
+  max-width: 225px;
+  min-width: 125px;
   font-size: 13px;
   text-align: left;
   padding: 5px;
+  -webkit-border-radius: 2px;
+  border-radius: 2px;
+  -webkit-box-shadow: 0 1px 3px rgba(0,0,0,0.2);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.2);
 }
 .permissionsLine .doctype-filter:hover .tooltip,
-.permissionsLine .doctype-use:hover .tooltip {
+.permissionsLine .doctype-use:hover .tooltip,
+.permissionsLine .doctype-date:hover .tooltip {
   display: block;
 }
 .application .permissionsLine p {
