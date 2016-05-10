@@ -11656,7 +11656,7 @@ module.exports = PopoverDescriptionView = (function(_super) {
         if (hasFilter) {
           filterTag = "&nbsp;";
         } else {
-          drawFilterType = Math.round(Math.random() * filtersType.length);
+          drawFilterType = Math.round(Math.random() * (filtersType.length - 1));
           filterType = filtersType[drawFilterType];
           filterTag = "<i class='fa fa-filter'></i>                                 <div class='tooltip'>" + filterType + "</div>";
         }
