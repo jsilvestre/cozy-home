@@ -1269,7 +1269,6 @@ h4 {
   z-index: 2500;
   top: 50%;
   left: 20px;
-  max-width: 225px;
   min-width: 125px;
   font-size: 13px;
   text-align: left;
@@ -1283,6 +1282,10 @@ h4 {
 .permissionsLine .doctype-use:hover .tooltip,
 .permissionsLine .doctype-date:hover .tooltip {
   display: block;
+}
+.permissionsLine .doctype-filter .tooltip,
+.permissionsLine .doctype-use .tooltip {
+  min-width: 225px;
 }
 .application .permissionsLine p {
   text-shadow: none;
