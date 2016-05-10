@@ -13,8 +13,8 @@
 
     .fake-checkbox
         flex 0
-        min-width 25px
-        height 15px
+        min-width 28px
+        height 20px
         border-radius 15px
         position relative
         background red
@@ -24,15 +24,16 @@
         &.checked
             background green
             .circle
-                left 0
+                left 2px
 
         .circle
-            right 0
+            top 2px
+            right 2px
             position absolute
             display inline-block
-            width 15px
-            height 15px
-            border-radius 15px
+            width 16px
+            height 16px
+            border-radius 20px
             background white
 
     .doctype-name
@@ -58,7 +59,8 @@
         position relative
 
         &.shared
-            color darkred
+            color grey-08
+            font-weight bold
 
     .doctype-filter
     .doctype-use
@@ -68,12 +70,14 @@
             background grey-08
             color #fff
             z-index 2500
-            top 0
-            left 100%
-            width 250px
+            top 50%
+            left 15px
+            width 225px
             font-size 13px
             text-align left
             padding 5px
+            border-radius 2px
+            box-shadow 0 1px 3px rgba(0, 0, 0, .2)
 
         &:hover .tooltip
          display block
