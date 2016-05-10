@@ -86,7 +86,7 @@ module.exports = class PopoverDescriptionView extends BaseView
 
 
                 if hasFilter
-                    filterTag = "&nbsp;"
+                    filterTag = "<i class='fa fa-filter disable'></i>"
                 else
                     drawFilterType = Math.round(Math.random() * (filtersType.length - 1))
                     filterType = filtersType[drawFilterType]
