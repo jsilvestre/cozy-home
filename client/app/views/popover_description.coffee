@@ -69,7 +69,8 @@ module.exports = class PopoverDescriptionView extends BaseView
                     <div class='fake-checkbox checked'><div class='circle'></div></div>
                     <div class='doctype-name'>Doctype</div>
                     <div class='doctype-filter'>Filtre</div>
-                    <div class='doctype-use'>Usage</div>"
+                    <div class='doctype-use'>Usage</div>
+                    <div class='doctype-date'>Date</div>"
             @body.append headerDiv
 
             filtersType = [
@@ -80,10 +81,18 @@ module.exports = class PopoverDescriptionView extends BaseView
                 'Accès restreint aux documents créé il y a plus de deux semaines.'
             ]
 
+
+            calendarsType = [
+                'Accès pour 1 jour'
+                'Accès pour 1 semaine'
+                'Accès pour 1 mois'
+                'Accès pour 3 mois'
+            ]
+
             for docType, permission of @model.get("permissions")
                 hasFilter = (Math.round(Math.random() * 100) + 1) <= 50
                 isShared = (Math.round(Math.random() * 100) + 1) <= 50
-
+                hasExpiration = (Math.round(Math.random() * 100) + 1) <= 50
 
                 if hasFilter
                     filterTag = "<i class='fa fa-filter disable'></i>"
@@ -100,11 +109,21 @@ module.exports = class PopoverDescriptionView extends BaseView
                     sharedClass = "shared"
                     sharedTag = "Partagé <div class='tooltip'>L'application demande l'autorisation d'envoyer cette donnée à l'extérieur. En savoir plus…</div>"
 
+
+                if hasExpiration
+                    calendarTag = "<i class='fa fa-calendar disable'></i>"
+                else
+                    drawCalendarType = Math.round(Math.random() * (calendarsType.length - 1))
+                    calendarType = calendarsType[drawCalendarType]
+                    calendarTag = "<i class='fa fa-calendar'></i>
+                                 <div class='tooltip'>#{calendarType}</div>"
+
                 permissionsDiv = $ "<div class='permissionsLine'>
                         <div class='fake-checkbox checked'><div class='circle'></div></div>
                         <div class='doctype-name'>#{docType}</div>
                         <div class='doctype-filter'>#{filterTag}</div>
-                        <div class='doctype-use #{sharedClass}'>#{sharedTag}</div>"
+                        <div class='doctype-use #{sharedClass}'>#{sharedTag}</div>
+                        <div class='doctype-date'>#{calendarTag}</div>"
                 @body.append permissionsDiv
 
         @$('.fake-checkbox').click (event) ->
