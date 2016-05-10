@@ -11645,10 +11645,10 @@ module.exports = PopoverDescriptionView = (function(_super) {
       this.body.append(permissionsDiv);
     } else {
       this.body.append("<h5>" + (t('required permissions')) + "</h5>");
-      headerDiv = $("<div class='permissionsLine header'>                    <div class='fake-checkbox checked'><div class='circle'></div></div>                    <div class='doctype-name'>Doctype</div>                    <div class='doctype-filter'>Filtre</div>                    <div class='doctype-use'>Usage</div>                    <div class='doctype-date'>Date</div>");
+      headerDiv = $("<div class='permissionsLine header'>                    <div class='fake-checkbox checked'><div class='circle'></div></div>                    <div class='doctype-name'>Doctype</div>                    <div class='doctype-filter'>Filtre</div>                    <div class='doctype-use'>Usage</div>                    <div class='doctype-date'>Durée</div>");
       this.body.append(headerDiv);
       filtersType = ['Accès restreint aux documents possédant le tag "Travail".', 'Accès restreint aux documents possédant le tag "Personnel".', 'Accès restreint aux documents possédant le tag "Vacances".', 'Accès restreint aux documents créés il y a plus de deux semaines.', 'Accès restreint aux documents créé il y a plus de deux semaines.'];
-      calendarsType = ['Accès pour 1 jour', 'Accès pour 1 semaine', 'Accès pour 1 mois', 'Accès pour 3 mois'];
+      calendarsType = ['31/12/2017', '04/09/2017', '06/06/2018', 'Accès pour 3 mois'];
       _ref1 = this.model.get("permissions");
       for (docType in _ref1) {
         permission = _ref1[docType];
@@ -11674,7 +11674,7 @@ module.exports = PopoverDescriptionView = (function(_super) {
         } else {
           drawCalendarType = Math.round(Math.random() * (calendarsType.length - 1));
           calendarType = calendarsType[drawCalendarType];
-          calendarTag = "<i class='fa fa-calendar'></i>                                 <div class='tooltip'>" + calendarType + "</div>";
+          calendarTag = "<i class='fa fa-calendar'></i> " + calendarType;
         }
         permissionsDiv = $("<div class='permissionsLine'>                        <div class='fake-checkbox checked'><div class='circle'></div></div>                        <div class='doctype-name'>" + docType + "</div>                        <div class='doctype-filter'>" + filterTag + "</div>                        <div class='doctype-use " + sharedClass + "'>" + sharedTag + "</div>                        <div class='doctype-date'>" + calendarTag + "</div>");
         this.body.append(permissionsDiv);
