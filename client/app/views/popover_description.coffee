@@ -70,7 +70,7 @@ module.exports = class PopoverDescriptionView extends BaseView
                     <div class='doctype-name'>Doctype</div>
                     <div class='doctype-filter'>Filtre</div>
                     <div class='doctype-use'>Usage</div>
-                    <div class='doctype-date'>Date</div>"
+                    <div class='doctype-date'>Durée</div>"
             @body.append headerDiv
 
             filtersType = [
@@ -83,9 +83,9 @@ module.exports = class PopoverDescriptionView extends BaseView
 
 
             calendarsType = [
-                'Accès pour 1 jour'
-                'Accès pour 1 semaine'
-                'Accès pour 1 mois'
+                '31/12/2017'
+                '04/09/2017'
+                '06/06/2018'
                 'Accès pour 3 mois'
             ]
 
@@ -115,8 +115,7 @@ module.exports = class PopoverDescriptionView extends BaseView
                 else
                     drawCalendarType = Math.round(Math.random() * (calendarsType.length - 1))
                     calendarType = calendarsType[drawCalendarType]
-                    calendarTag = "<i class='fa fa-calendar'></i>
-                                 <div class='tooltip'>#{calendarType}</div>"
+                    calendarTag = "<i class='fa fa-calendar'></i> #{calendarType}"
 
                 permissionsDiv = $ "<div class='permissionsLine'>
                         <div class='fake-checkbox checked'><div class='circle'></div></div>

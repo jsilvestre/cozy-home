@@ -50,11 +50,19 @@
         position relative
 
         i
-            cursor help
+            cursor pointer
+
+            &:hover
+                opacity .2
 
             &.disable
                 cursor auto
                 opacity .2
+
+        &:hover i
+            color blue
+            opacity 1
+
 
     .doctype-use
         flex 0
@@ -65,7 +73,7 @@
         min-width 75px
 
         &.shared
-            color grey-08
+            color darkred
             font-weight bold
 
     .doctype-filter
@@ -92,6 +100,9 @@
     .doctype-filter .tooltip
     .doctype-use .tooltip
         min-width 225px
+
+    .doctype-date
+        width auto
 
 // -- end of fake advanved permission system
 
