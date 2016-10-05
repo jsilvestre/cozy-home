@@ -371,6 +371,10 @@ exports.del = function(url, callbacks) {
 exports.head = function(url, callbacks) {
   return exports.request("HEAD", url, null, callbacks);
 };
+
+exports.getSAMEORIGINError = function(hash) {
+  return hash.match(/^(\w*:\/\/\w+\.)/);
+};
 });
 
 ;require.register("helpers/color-set", function(exports, require, module) {
@@ -2487,7 +2491,7 @@ module.exports = {
     "welcome to your cozy": "Bienvenue sur votre Cozy !",
     "you have no apps": "Vous n'avez aucune application installée.",
     "app management": "Gestion des applications",
-    "app store": "Ajouter",
+    "app store": "Store",
     "configuration": "Configuration",
     "assistance": "Aide",
     "hardware consumption": "Matériel",
@@ -6513,11 +6517,11 @@ module.exports = Application = (function(_super) {
       section = 'main';
     } else if (name === 'blog' || name === 'feeds' || name === 'bookmarks' || name === 'quickmarks' || name === 'zero-feeds') {
       section = 'watch';
-    } else if (name === 'kresus' || name === 'konnectors' || name === 'kyou' || name === 'databrowser' || name === 'import-from-google') {
+    } else if (name === 'kresus' || name === 'kyou' || name === 'databrowser' || name === 'import-from-google') {
       section = 'data';
     } else if (name === 'todos' || name === 'notes' || name === 'tasky' || name === 'tiddlywiki') {
       section = 'productivity';
-    } else if (name === 'sync') {
+    } else if (name === 'sync' || name === 'konnectors') {
       section = 'platform';
     }
     return section;
@@ -6825,13 +6829,15 @@ module.exports = User = (function(_super) {
 });
 
 ;require.register("routers/main_router", function(exports, require, module) {
-var MainRouter, ObjectPickerCroper, Token, _ref,
+var MainRouter, ObjectPickerCroper, Token, client, _ref,
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
 
 ObjectPickerCroper = require('../views/object_picker');
 
 Token = require("../models/token");
+
+client = require('../helpers/client');
 
 module.exports = MainRouter = (function(_super) {
   __extends(MainRouter, _super);
@@ -6852,8 +6858,8 @@ module.exports = MainRouter = (function(_super) {
     "update-stack": "updateStack",
     "apps/:slug": "application",
     "apps/:slug/*hash": "application",
-    "*path": "applicationList",
-    '*notFound': 'applicationList'
+    "*path": "default",
+    '*notFound': 'default'
   };
 
   MainRouter.prototype.initialize = function() {
@@ -6905,6 +6911,18 @@ module.exports = MainRouter = (function(_super) {
     });
   };
 
+  MainRouter.prototype["default"] = function(hash) {
+    return this.navigate('home', true);
+  };
+
+  MainRouter.prototype.navigate = function(hash, trigger) {
+    if (client.getSAMEORIGINError(hash)) {
+      hash = '';
+      trigger = true;
+    }
+    return MainRouter.__super__.navigate.call(this, hash, trigger);
+  };
+
   MainRouter.prototype.applicationList = function() {
     return app.mainView.displayApplicationsList();
   };
@@ -6930,6 +6948,9 @@ module.exports = MainRouter = (function(_super) {
   };
 
   MainRouter.prototype.application = function(slug, hash) {
+    if (hash == null) {
+      hash = '';
+    }
     return app.mainView.displayApplication(slug, hash);
   };
 
@@ -7117,7 +7138,7 @@ var buf = [];
 with (locals || {}) {
 var interp;
 buf.push('<iframe');
-buf.push(attrs({ 'src':("apps/" + (id) + "/" + (hash) + ""), 'id':("" + (id) + "-frame") }, {"src":true,"id":true}));
+buf.push(attrs({ 'src':("" + (source) + ""), 'id':("" + (id) + "") }, {"src":true,"id":true}));
 buf.push('></iframe>');
 }
 return buf.join("");
@@ -7467,10 +7488,10 @@ buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</h2><div class="application-container"></div></section><section id="apps-platform" class="line show"><h2>');
 var __val__ = t('home section platform')
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</h2><div class="application-container"><div class="application mod w360-33 w640-25 full-20 left platform-app"><div class="application-inner"><a href="#applications"><img src="img/apps/store.svg" class="icon"/><p class="app-title">');
+buf.push('</h2><div class="application-container"><div class="application mod w360-33 w640-25 full-20 left platform-app"><div class="application-inner store"><a href="#applications"><img src="img/apps/store.svg" class="icon"/><p class="app-title">');
 var __val__ = t('app store')
 buf.push(escape(null == __val__ ? "" : __val__));
-buf.push('</p></a></div></div><div class="application mod w360-33 w640-25 full-20 left platform-app"><div class="application-inner"><a href="#config-applications"><img src="img/apps/my-apps.svg" class="icon svg"/><p class="app-title">');
+buf.push('</p></a></div></div><div class="application mod w360-33 w640-25 full-20 left platform-app"><div class="application-inner myapps"><a href="#config-applications"><img src="img/apps/my-apps.svg" class="icon svg"/><p class="app-title">');
 var __val__ = t('app status')
 buf.push(escape(null == __val__ ? "" : __val__));
 buf.push('</p></a></div></div><div class="application mod w360-33 w640-25 full-20 left platform-app"><div href="#account" class="application-inner"><a href="#account"><img src="img/apps/settings.svg" class="icon svg"/><p class="app-title">');
@@ -9152,9 +9173,11 @@ module.exports = ConfigApplicationsView = (function(_super) {
       needsUpdate: true
     }).length > 0;
     if (this.toUpdate || appNeedUpdate) {
-      return this.updateBtn.show();
+      this.updateBtn.show();
+      return this.updateBtn.removeAttr('disable');
     } else {
-      return this.updateBtn.hide();
+      this.updateBtn.hide();
+      return this.updateBtn.attr('disable', true);
     }
   };
 
@@ -9243,33 +9266,32 @@ module.exports = ConfigApplicationsView = (function(_super) {
     return setTimeout(this.fetch, 10000);
   };
 
-  ConfigApplicationsView.prototype.onUpdateClicked = function() {
-    return this.showUpdateStackDialog();
+  ConfigApplicationsView.prototype.onUpdateClicked = function(event) {
+    var isDisabled;
+    if (!(isDisabled = this.updateBtn.attr('disable'))) {
+      this.updateBtn.attr('disable', true);
+      return this.showUpdateStackDialog();
+    }
   };
 
   ConfigApplicationsView.prototype.showUpdateStackDialog = function() {
     var _this = this;
     if (this.popover != null) {
-      this.popover.hide();
+      this.popover.remove();
     }
     this.popover = new UpdateStackModal({
-      confirm: function(application) {
-        return _this.runFullUpdate(function(err, permissionChanges) {
+      confirm: function(model) {
+        return _this.runFullUpdate(function(err, changes) {
           if (err) {
-            return _this.popover.onError(err, permissionChanges);
+            return _this.popover.onError(err, changes);
           } else {
-            return _this.popover.onSuccess(permissionChanges);
+            return _this.popover.onSuccess(changes);
           }
         });
       },
-      cancel: function(application) {
-        _this.popover.hide();
-        return _this.popover.remove();
-      },
-      end: function(success) {
-        if (success) {
-          return location.reload();
-        }
+      cancel: function(model) {
+        _this.popover.remove();
+        return _this.render();
       }
     });
     $("#config-applications-view").append(this.popover.$el);
@@ -9279,14 +9301,14 @@ module.exports = ConfigApplicationsView = (function(_super) {
   ConfigApplicationsView.prototype.runFullUpdate = function(callback) {
     var _this = this;
     Backbone.Mediator.pub('update-stack:start');
-    return this.applications.updateAll(function(err, permissionChanges) {
+    return this.applications.updateAll(function(err, changes) {
       var _ref;
       if (err) {
-        return callback(err, (_ref = err.data) != null ? _ref.permissionChanges : void 0);
+        return callback(err, (_ref = err.data) != null ? _ref.changes : void 0);
       }
       return _this.stackApplications.updateStack(function(err) {
         Backbone.Mediator.pub('update-stack:end');
-        return callback(err, permissionChanges);
+        return callback(err, changes);
       });
     });
   };
@@ -9734,7 +9756,6 @@ module.exports = ApplicationRow = (function(_super) {
     this.startApp = __bind(this.startApp, this);
     this.onAppClicked = __bind(this.onAppClicked, this);
     this.onUninstall = __bind(this.onUninstall, this);
-    this.onAppChanged = __bind(this.onAppChanged, this);
     this.afterRender = __bind(this.afterRender, this);
     this.id = "app-btn-" + options.model.id;
     this.enabled = true;
@@ -9750,7 +9771,7 @@ module.exports = ApplicationRow = (function(_super) {
     this.background = this.$('img');
     this.listenTo(this.model, 'change', this.onAppChanged);
     this.listenTo(this.model, 'uninstall', this.onUninstall);
-    this.onAppChanged(this.model);
+    this.onAppChanged();
     this.setBackgroundColor();
     if (this.model.isIconSvg()) {
       return this.icon.addClass('svg');
@@ -9780,7 +9801,10 @@ module.exports = ApplicationRow = (function(_super) {
         this.icon.attr('src', src);
         this.icon.show();
         this.icon.removeClass('stopped');
-        return $("#" + (this.model.get('slug')) + "-frame").remove();
+        if (this.model.previous('state') !== 'stopped') {
+          return $("#" + (this.model.get('slug')) + "-frame").remove();
+        }
+        break;
       case 'installing':
         this.showSpinner();
         return this.setBackgroundColor();
@@ -11482,7 +11506,7 @@ module.exports = LongList = (function() {
 });
 
 ;require.register("views/main", function(exports, require, module) {
-var AccountView, AppCollection, ApplicationsListView, BaseView, ConfigApplicationsView, DeviceCollection, HomeView, IntentManager, MarketView, NavbarView, NotificationCollection, SocketListener, StackAppCollection, User, appIframeTemplate,
+var AccountView, AppCollection, ApplicationsListView, BaseView, ConfigApplicationsView, DeviceCollection, HomeView, IntentManager, MarketView, NavbarView, NotificationCollection, SocketListener, StackAppCollection, User, appIframeTemplate, client,
   __bind = function(fn, me){ return function(){ return fn.apply(me, arguments); }; },
   __hasProp = {}.hasOwnProperty,
   __extends = function(child, parent) { for (var key in parent) { if (__hasProp.call(parent, key)) child[key] = parent[key]; } function ctor() { this.constructor = child; } ctor.prototype = parent.prototype; child.prototype = new ctor(); child.__super__ = parent.prototype; return child; };
@@ -11514,6 +11538,8 @@ SocketListener = require('lib/socket_listener');
 User = require('models/user');
 
 IntentManager = require('lib/intent_manager');
+
+client = require('helpers/client');
 
 module.exports = HomeView = (function(_super) {
   __extends(HomeView, _super);
@@ -11680,7 +11706,7 @@ module.exports = HomeView = (function(_super) {
   HomeView.prototype.displayUpdateApplication = function(slug) {
     var action, method, timeout;
     this.displayView(this.configApplications, t("cozy applications title"));
-    window.app.routers.main.navigate('config-applications', false);
+    this.navigate('config-applications');
     method = this.configApplications.openUpdatePopover;
     action = method.bind(this.configApplications, slug);
     timeout = null;
@@ -11699,14 +11725,14 @@ module.exports = HomeView = (function(_super) {
     var _this = this;
     this.displayView(this.configApplications);
     window.document.title = t("cozy applications title");
-    window.app.routers.main.navigate('config-applications', false);
+    this.navigate('config-applications');
     return setTimeout(function() {
       return _this.configApplications.onUpdateClicked();
     }, 500);
   };
 
   HomeView.prototype.displayApplication = function(slug, hash) {
-    var err, frame, onLoad, _base, _base1,
+    var frame, iframeID, onLoad, _base, _base1,
       _this = this;
     if (app.mainView.viewModel.get('updatingStack')) {
       return alert(t('stack updating block message'));
@@ -11725,7 +11751,8 @@ module.exports = HomeView = (function(_super) {
     } else {
       this.$("#app-btn-" + slug + " .spinner").show();
       this.$("#app-btn-" + slug + " .icon").hide();
-      frame = this.$("#" + slug + "-frame");
+      iframeID = this.getAppFrameID(slug);
+      frame = this.$("#" + iframeID);
       onLoad = function() {
         var app, name;
         _this.frames.css('top', '0');
@@ -11735,10 +11762,10 @@ module.exports = HomeView = (function(_super) {
         _this.content.hide();
         _this.backButton.show();
         _this.$('#app-frames').find('iframe').hide();
-        frame.show();
+        _this.$("#" + iframeID).show();
         _this.selectedApp = slug;
         app = _this.apps.get(slug);
-        name = app.get('displayName') || app.get('name') || '';
+        name = (app != null ? app.get('displayName') : void 0) || (app != null ? app.get('name') : void 0) || '';
         if (name.length > 0) {
           name = name.replace(/^./, name[0].toUpperCase());
         }
@@ -11747,28 +11774,23 @@ module.exports = HomeView = (function(_super) {
         _this.$("#app-btn-" + slug + " .spinner").hide();
         return _this.$("#app-btn-" + slug + " .icon").show();
       };
-      if (frame.length === 0) {
-        frame = this.createApplicationIframe(slug, hash);
+      if (!frame.length) {
+        this.createApplicationIframe(slug, hash, {
+          id: iframeID
+        });
         this.frames.show();
         this.frames.css('top', '-9999px');
         this.frames.css('left', '-9999px');
         this.frames.css('position', 'absolute');
-        return frame.on('load', _.once(onLoad));
+        return $("#" + iframeID).prop('contentWindow').addEventListener('load', onLoad);
       } else if (hash) {
-        try {
-          frame.prop('contentWindow').location.hash = hash;
-        } catch (_error) {
-          err = _error;
-          console.err(err);
-        }
+        this.navigate({
+          slug: slug,
+          hash: hash
+        });
         return onLoad();
       } else if (frame.is(':visible')) {
-        try {
-          frame.prop('contentWindow').location.hash = '';
-        } catch (_error) {
-          err = _error;
-          console.err(err);
-        }
+        this.navigate('');
         return onLoad();
       } else {
         return onLoad();
@@ -11777,7 +11799,7 @@ module.exports = HomeView = (function(_super) {
   };
 
   HomeView.prototype.createApplicationIframe = function(slug, hash) {
-    var iframe$, iframeHTML,
+    var id, iframe$, iframeHTML, iframeWindow, source,
       _this = this;
     if (hash == null) {
       hash = "";
@@ -11785,20 +11807,24 @@ module.exports = HomeView = (function(_super) {
     if ((hash != null ? hash.length : void 0) > 0) {
       hash = "#" + hash;
     }
+    id = this.getAppFrameID(slug);
+    source = this.getIframeLocation({
+      hash: hash,
+      slug: slug
+    });
     iframeHTML = appIframeTemplate({
-      id: slug,
-      hash: hash
+      id: id,
+      source: source
     });
     iframe$ = $(iframeHTML).appendTo(this.frames);
-    iframe$.prop('contentWindow').addEventListener('hashchange', function() {
-      var location, newhash;
-      location = iframe$.prop('contentWindow').location;
-      newhash = location.hash.replace('#', '');
+    iframeWindow = this.$("#" + id).prop('contentWindow');
+    iframeWindow.onhashchange = function() {
+      var newhash;
+      newhash = iframeWindow.location.hash.replace('#', '');
       return _this.onAppHashChanged(slug, newhash);
-    });
+    };
     this.forceIframeRendering();
-    this.intentManager.registerIframe(iframe$[0], '*');
-    return iframe$;
+    return this.intentManager.registerIframe(iframe$[0], '*');
   };
 
   HomeView.prototype.onAppHashChanged = function(slug, newhash) {
@@ -11806,20 +11832,18 @@ module.exports = HomeView = (function(_super) {
     if (slug === this.selectedApp) {
       currentHash = location.hash.substring(("#apps/" + slug + "/").length);
       if (currentHash !== newhash) {
-        if (typeof app !== "undefined" && app !== null) {
-          app.routers.main.navigate("apps/" + slug + "/" + newhash, false);
-        }
+        this.navigate(slug, newhash);
       }
       return this.forceIframeRendering();
     }
   };
 
   HomeView.prototype.onAppStateChanged = function(appState) {
-    var frame, _ref;
+    var iframeID, _ref;
     if ((_ref = appState.status) === 'updating' || _ref === 'broken' || _ref === 'uninstalled') {
-      frame = this.getAppFrame(appState.slug);
-      frame.remove();
-      return frame.off('load');
+      iframeID = this.getAppFrameID(appState.slug);
+      $("#" + iframeID).off('load');
+      return $("#" + iframeID).remove();
     }
   };
 
@@ -11843,20 +11867,38 @@ module.exports = HomeView = (function(_super) {
     }, 10);
   };
 
-  HomeView.prototype.getAppFrame = function(slug) {
-    return this.$("#" + slug + "-frame");
+  HomeView.prototype.getAppFrameID = function(slug) {
+    return "" + slug + "-frame";
   };
 
   HomeView.prototype.displayToken = function(token, slug, source) {
-    var iframeWin;
-    iframeWin = source;
-    if (iframeWin == null) {
-      iframeWin = document.getElementById("" + slug + "-frame").contentWindow;
-    }
+    var iframeID, iframeWin;
+    iframeID = this.getAppFrameID(slug);
+    iframeWin = this.$("#" + iframeID).prop('contentWindow');
     return iframeWin.postMessage({
       token: token,
       appName: slug
     }, '*');
+  };
+
+  HomeView.prototype.getIframeLocation = function(data) {
+    var hash, slug, value;
+    value = '/';
+    if (_.isObject(data)) {
+      slug = data.slug, hash = data.hash;
+      value += "apps/" + slug + "/" + hash;
+    } else {
+      value += data.toString();
+    }
+    return value;
+  };
+
+  HomeView.prototype.navigate = function(hash) {
+    var iframeHash, _ref, _ref1, _ref2;
+    iframeHash = this.getIframeLocation(hash);
+    if (!(client.getSAMEORIGINError(iframeHash))) {
+      return typeof window !== "undefined" && window !== null ? (_ref = window.app) != null ? (_ref1 = _ref.routers) != null ? (_ref2 = _ref1.main) != null ? _ref2.navigate(iframeHash, false) : void 0 : void 0 : void 0 : void 0;
+    }
   };
 
   return HomeView;
@@ -12168,7 +12210,6 @@ module.exports = ApplicationRow = (function(_super) {
   function ApplicationRow(app, marketView) {
     this.app = app;
     this.marketView = marketView;
-    this.onInstallClicked = __bind(this.onInstallClicked, this);
     this.afterRender = __bind(this.afterRender, this);
     ApplicationRow.__super__.constructor.call(this);
     this.mouseOut = true;
@@ -13611,7 +13652,6 @@ module.exports = PopoverDescriptionView = (function(_super) {
   __extends(PopoverDescriptionView, _super);
 
   function PopoverDescriptionView() {
-    this.onConfirmClicked = __bind(this.onConfirmClicked, this);
     this.onCancelClicked = __bind(this.onCancelClicked, this);
     this.hide = __bind(this.hide, this);
     this.show = __bind(this.show, this);
@@ -13635,7 +13675,7 @@ module.exports = PopoverDescriptionView = (function(_super) {
 
   PopoverDescriptionView.prototype.initialize = function(options) {
     PopoverDescriptionView.__super__.initialize.apply(this, arguments);
-    this.confirmCallback = options.confirm;
+    this.confirmCallback = _.once(options.confirm);
     this.cancelCallback = options.cancel;
     this.label = options.label != null ? options.label : t('install');
     return this.$("#confirmbtn").html(this.label);
@@ -13859,8 +13899,7 @@ module.exports = UpdateStackModal = (function(_super) {
   UpdateStackModal.prototype.initialize = function(options) {
     UpdateStackModal.__super__.initialize.apply(this, arguments);
     this.confirmCallback = options.confirm;
-    this.cancelCallback = options.cancel;
-    return this.endCallback = options.end;
+    return this.cancelCallback = options.cancel;
   };
 
   UpdateStackModal.prototype.afterRender = function() {
@@ -13902,22 +13941,22 @@ module.exports = UpdateStackModal = (function(_super) {
     return $('#home-content').removeClass('md-open');
   };
 
-  UpdateStackModal.prototype.onSuccess = function(permissionChanges) {
+  UpdateStackModal.prototype.displaySuccessChanges = function(changes) {
     this.$('.step2').hide();
     this.$('.success').show();
-    this.showPermissionsChanged(permissionChanges);
-    this.$('#ok').show();
-    return this.$('#confirmbtn').hide();
-  };
-
-  UpdateStackModal.prototype.onError = function(err, permissionChanges) {
-    var app, html, infos, _ref1;
-    this.blocked = false;
-    this.$('.step2').hide();
-    this.$('.error').show();
     this.$('#ok').show();
     this.$('#confirmbtn').hide();
-    this.showPermissionsChanged(permissionChanges);
+    return this.showPermissionsChanged(changes);
+  };
+
+  UpdateStackModal.prototype.onSuccess = function(changes) {
+    return this.displaySuccessChanges(changes);
+  };
+
+  UpdateStackModal.prototype.onError = function(err, changes) {
+    var app, html, infos, _ref1;
+    this.blocked = false;
+    this.displaySuccessChanges(changes);
     if ((((_ref1 = err.data) != null ? _ref1.message : void 0) != null) && typeof err.data.message === 'object') {
       infos = err.data.message;
       if (Object.keys(infos).length > 0) {
@@ -13927,19 +13966,18 @@ module.exports = UpdateStackModal = (function(_super) {
           html += "<li class='app-broken'>" + app + "</li>";
         }
         html += "</ul>";
-        this.body.append(html);
+        return this.body.append(html);
       }
     } else {
-      this.$('.apps-error').hide();
+      return this.$('.apps-error').hide();
     }
-    return this.endCallback(false);
   };
 
-  UpdateStackModal.prototype.showPermissionsChanged = function(permissionChanges) {
+  UpdateStackModal.prototype.showPermissionsChanged = function(changes) {
     var app, html;
-    if ((permissionChanges != null) && Object.keys(permissionChanges).length > 0) {
+    if ((changes != null) && Object.keys(changes).length > 0) {
       html = "<ul>";
-      for (app in permissionChanges) {
+      for (app in changes) {
         html += "<li class='app-changed'>" + app + "</li>";
       }
       html += "</ul>";
@@ -13950,7 +13988,7 @@ module.exports = UpdateStackModal = (function(_super) {
 
   UpdateStackModal.prototype.onClose = function() {
     this.hide();
-    return this.endCallback(true);
+    return this.cancelCallback();
   };
 
   UpdateStackModal.prototype.onCancelClicked = function() {
